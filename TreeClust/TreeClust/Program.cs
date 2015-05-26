@@ -60,6 +60,9 @@ namespace TreeClust
                     case "-max":
                         FileParser.SetMax(int.Parse(value));
                         break;
+                    case "-buffer":
+                        FileParser.SetBuffer(int.Parse(value));
+                        break;
                     default:
                         Console.WriteLine("Invalid option {0}", cmd);
                         return;

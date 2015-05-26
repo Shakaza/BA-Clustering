@@ -12,11 +12,10 @@ namespace TreeClust
         private static StreamReader SR;
         public static bool skipLine;
         public static Task t;
+        public static int Size = 10;
         public static string path;
         private static int Read = 0;
         private static Queue<string> Q;
-        private static string[] buffer = new string[10];
-        private static long[] posList = new long[10];
         public static bool forceStop = false;
         private static int MaxIter = int.MaxValue;
         public static void fileReader(string path)
@@ -24,22 +23,27 @@ namespace TreeClust
             FileParser.path = path;
             Q = new Queue<string>();
             SR = new StreamReader(new FileStream(path, FileMode.Open));
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < Size; i++)
             {
                 if (skipLine) SR.ReadLine();
                 Q.Enqueue(SR.ReadLine());
             }
             forceStop = false;
-            Read = 0;
+            Read = Size;
             t = new Task(loop);
             t.Start();
+        }
+
+        public static void SetBuffer(int size)
+        {
+            Size = size;
         }
 
         private static void loop()
         {
             while (!SR.EndOfStream && !forceStop && Read < MaxIter)
             {
-                while (Q.Count >= 50) ;
+                while (Q.Count >= Size) ;
                 if (skipLine) SR.ReadLine();
                 Q.Enqueue(SR.ReadLine());
                 Read++;
