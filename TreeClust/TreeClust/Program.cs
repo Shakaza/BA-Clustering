@@ -20,6 +20,8 @@ namespace TreeClust
                 Console.WriteLine("Additional flags:");
                 Console.WriteLine("\t -k <kmersize>");
                 Console.WriteLine("\t -interval <interval width>");
+                Console.WriteLine("\t -buffer <prefetched input size>");
+                Console.WriteLine("\t -max <number of sequences to process>");
                 return;
             }
             if (args.Length % 2 != 0)
@@ -75,16 +77,43 @@ namespace TreeClust
             }
             Output.ResetOutput();
             FileInfo file = new FileInfo(path);
-            FileParser.fileReader(path);
-            if (file.Extension == "fna")
+            if (file.Extension == ".fna")
             {
-                FileParser.skipLine = true;
+                FileParser.fna = true;
             }
             else
             {
-                FileParser.skipLine = false;
+                FileParser.fna = false;
             }
+            FileParser.fileReader(path);
             ClusterStructure.FixedKMerIntervalTreeSortingCluster(threshold, k, interval);
+            Output.queue.CompleteAdding();
+            Output.writeTask.Wait();
+        }
+
+        private static void CopyNElements(string[] args)
+        {
+            using (StreamWriter writer = new StreamWriter(new FileStream(args[1], FileMode.OpenOrCreate)))
+            {
+                StreamReader SR = new StreamReader(new FileStream(args[0], FileMode.Open));
+                for (int i = 0; i < int.Parse(args[2]); i++)
+                {
+                    string sequence = "";
+                    char firstChar;
+                    string header = SR.ReadLine();
+                    while ((firstChar = (char)SR.Read()) != '>')
+                    {
+                        string line = SR.ReadLine();
+                        string replaceWith = "";
+                        string removedBreaks = line.Replace("\r\n", replaceWith).Replace("\n", replaceWith).Replace("\r", replaceWith);
+                        sequence = sequence + firstChar + removedBreaks;
+                    }
+                    writer.WriteLine(">" + header);
+                    writer.WriteLine(sequence);
+                    Console.Write("\rWrote {0}/{1}", i + 1, int.Parse(args[2]));
+                }
+                SR.Close();
+            }
         }
     }
 }

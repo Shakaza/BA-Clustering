@@ -49,7 +49,7 @@ namespace TreeClust
             }
             watch.Stop();
             console.Abort();
-            Console.Write("\rClustered {0} Clusters: {1} s/sek {3} Time: {2}", i, i - Clustered, watch.Elapsed.ToString(), Math.Round(i / (watch.ElapsedMilliseconds / 1000.0d), 1));
+            Console.Write("\rClustered {0:n0} Clusters: {1:n0} s/sek: {3:n1} Time: {2}  ", i, i - Clustered, watch.Elapsed.ToString(@"hh\:mm\:ss"), Math.Round(i / (watch.ElapsedMilliseconds / 1000.0d), 1));
             Console.WriteLine();
             Console.WriteLine("Clustering took " + watch.Elapsed.ToString());
             return n;
@@ -61,8 +61,15 @@ namespace TreeClust
             watch.Start();
             while (true)
             {
-                Thread.Sleep(100);
-                Console.Write("\rClustered {0} Clusters: {1} s/sek {3} Time: {2} Ram: {4}mb", i, i - Clustered, watch.Elapsed.ToString(), Math.Round(i / (watch.ElapsedMilliseconds / 1000.0d), 1), GC.GetTotalMemory(true) / (1024 * 1024));
+                try
+                {
+                    Thread.Sleep(100);
+                    Console.Write("\rClustered {0:n0} Clusters: {1:n0} s/sek: {3:n1} Time: {2} Ram: {4:n0}mb  ", i, i - Clustered, watch.Elapsed.ToString(@"hh\:mm\:ss"), Math.Round(i / (watch.ElapsedMilliseconds / 1000.0d), 1), GC.GetTotalMemory(true) / (1024 * 1024));
+                }
+                catch
+                {
+
+                }
             }
         }
     }

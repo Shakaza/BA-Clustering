@@ -10,11 +10,11 @@ namespace TreeClust
     class FileParser
     {
         private static StreamReader SR;
-        public static bool skipLine;
+        public static bool fna;
         public static Task t;
         public static int Size = 10;
         public static string path;
-        private static int Read = 0;
+        public static int Read = 0;
         private static Queue<string> Q;
         public static bool forceStop = false;
         private static int MaxIter = int.MaxValue;
@@ -25,8 +25,25 @@ namespace TreeClust
             SR = new StreamReader(new FileStream(path, FileMode.Open));
             for (int i = 0; i < Size; i++)
             {
-                if (skipLine) SR.ReadLine();
-                Q.Enqueue(SR.ReadLine());
+                string sequence = "";
+                if (fna) 
+                {
+                    char firstChar;
+                    string header = SR.ReadLine();
+                    while((firstChar = (char)SR.Read()) != '>')
+                    {
+                        string line = SR.ReadLine();
+                        string replaceWith = "";
+                        string removedBreaks = line.Replace("\r\n", replaceWith).Replace("\n", replaceWith).Replace("\r", replaceWith);
+                        sequence = sequence + firstChar + removedBreaks;
+                    }
+                    
+                }
+                else
+                {
+                    sequence = SR.ReadLine();
+                }
+                Q.Enqueue(sequence);
             }
             forceStop = false;
             Read = Size;
@@ -44,8 +61,25 @@ namespace TreeClust
             while (!SR.EndOfStream && !forceStop && Read < MaxIter)
             {
                 while (Q.Count >= Size) ;
-                if (skipLine) SR.ReadLine();
-                Q.Enqueue(SR.ReadLine());
+                string sequence = "";
+                if (fna)
+                {
+                    char firstChar;
+                    string header = SR.ReadLine();
+                    while (!SR.EndOfStream && (firstChar = (char)SR.Read()) != '>')
+                    {
+                        string line = SR.ReadLine();
+                        string replaceWith = "";
+                        string removedBreaks = line.Replace("\r\n", replaceWith).Replace("\n", replaceWith).Replace("\r", replaceWith);
+                        sequence = sequence + firstChar + removedBreaks;
+                    }
+
+                }
+                else
+                {
+                    sequence = SR.ReadLine();
+                }
+                Q.Enqueue(sequence);
                 Read++;
             }
             SR.Close();
